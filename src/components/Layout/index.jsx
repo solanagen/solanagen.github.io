@@ -29,7 +29,7 @@ const Layout = ({ children }) => {
       items: [
         { path: '/meme-generator', label: 'Meme Generator' },
         { path: '/chat', label: 'Chat with AI' },
-        { path: '/terminal', label: 'Trading Terminal' },
+        // { path: '/terminal', label: 'Trading Terminal' },
       ]
     },
   ];
