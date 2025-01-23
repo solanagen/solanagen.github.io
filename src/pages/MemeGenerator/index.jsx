@@ -143,24 +143,8 @@ const MemeGenerator = () => {
     { src: '/thoughtful_pepe.png', name: 'Thoughtful' },
     { src: '/typing_pepe.png', name: 'Typing' },
     { src: '/unimpressed_pepe.png', name: 'Unimpressed' },
-    { src: '/victory_pepe.png', name: 'Victory' },
-    // Animated templates (webm)
-    { src: '/confused_pepe.webm', name: 'Confused (Animated)', isAnimated: true },
-    { src: '/cutie.webm', name: 'Cutie (Animated)', isAnimated: true },
-    { src: '/me_question_mark_pepe_or_shy.webm', name: 'Shy (Animated)', isAnimated: true },
-    { src: '/peeking-pepe.webm', name: 'Peeking (Animated)', isAnimated: true },
-    { src: '/relaxed-with-coffee-and-snowing-outside.webm', name: 'Relaxed Coffee (Animated)', isAnimated: true },
-    { src: '/rofl_pepe.webm', name: 'ROFL (Animated)', isAnimated: true },
-    { src: '/typing_pepe.webm', name: 'Typing (Animated)', isAnimated: true },
-    { src: '/victory_pepe.webm', name: 'Victory (Animated)', isAnimated: true },
-  ].sort((a, b) => {
-    // First sort by animation status (non-animated first)
-    if (a.isAnimated !== b.isAnimated) {
-      return a.isAnimated ? 1 : -1;
-    }
-    // Then sort by name
-    return a.name.localeCompare(b.name);
-  });
+    { src: '/victory_pepe.png', name: 'Victory' }
+  ].sort((a, b) => a.name.localeCompare(b.name));
 
   const backgrounds = [
     { src: '/backgrounds/1.png', name: 'Background 1' },
