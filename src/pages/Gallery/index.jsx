@@ -45,11 +45,11 @@ const Gallery = () => {
             />
           )}
           {/* Hover overlay */}
-          <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+          {/* <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
             <button className="px-4 py-2 bg-primary text-background rounded-lg font-press-start text-sm hover:bg-accent transition-colors">
               View Full Size
             </button>
-          </div>
+          </div> */}
           {isAnimated && (
             <div className="absolute top-2 right-2 bg-accent/80 text-xs font-press-start px-2 py-1 rounded">
               GIF

@@ -111,7 +111,7 @@ const Tokenomics = () => {
         className="bg-accent p-8 rounded-xl text-center"
       >
         <h2 className="text-2xl md:text-3xl font-press-start text-background mb-2">
-          Total Supply: 420,690,000,000 $AUTISM
+          Total Supply: 420,690,000,000 $AI
         </h2>
         <p className="text-background">The perfect number doesn't exi-</p>
       </MotionDiv>
