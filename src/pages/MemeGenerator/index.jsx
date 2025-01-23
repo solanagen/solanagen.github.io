@@ -1,5 +1,5 @@
-import { useState, useRef } from 'react';
-import { motion } from 'framer-motion';
+import { useState, useRef, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import html2canvas from 'html2canvas';
 
 const MotionDiv = motion.div;
@@ -13,7 +13,26 @@ const MemeGenerator = () => {
   const [topText, setTopText] = useState('');
   const [bottomText, setBottomText] = useState('');
   const [imageScale, setImageScale] = useState(1);
+  const [isTemplateOpen, setIsTemplateOpen] = useState(false);
+  const [isBackgroundOpen, setIsBackgroundOpen] = useState(false);
   const canvasRef = useRef(null);
+  const templateDropdownRef = useRef(null);
+  const backgroundDropdownRef = useRef(null);
+
+  // Close dropdowns when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (templateDropdownRef.current && !templateDropdownRef.current.contains(event.target)) {
+        setIsTemplateOpen(false);
+      }
+      if (backgroundDropdownRef.current && !backgroundDropdownRef.current.contains(event.target)) {
+        setIsBackgroundOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   const templates = [
     { src: '/100x_pepe.png', name: '100x' },
@@ -133,84 +152,173 @@ const MemeGenerator = () => {
       </div>
 
       {/* Workspace */}
-      <div className="grid grid-cols-1 lg:grid-cols-[300px,1fr] gap-8">
-        {/* Template and Background Selector */}
+      <div className="grid grid-cols-1 lg:grid-cols-[300px,1fr,300px] gap-8">
+        {/* Left Column - Template and Background Selector */}
         <div className="space-y-8">
           {/* Template Selector */}
-          <div className="bg-primary/10 rounded-xl p-6">
+          <div className="bg-primary/10 rounded-xl p-6" ref={templateDropdownRef}>
             <h3 className="font-press-start mb-6">Choose Template</h3>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-4 max-h-[300px] overflow-y-auto pr-2">
-              {templates.map((template, index) => (
-                <MotionButton
-                  key={index}
-                  onClick={() => setSelectedTemplate(template.src)}
-                  className={`w-full p-4 border-2 border-primary rounded-lg flex items-center gap-4 transition-all ${
-                    selectedTemplate === template.src
-                      ? 'bg-primary text-background'
-                      : 'bg-transparent hover:bg-primary/20'
-                  }`}
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
+            <div className="relative">
+              <MotionButton
+                onClick={() => setIsTemplateOpen(!isTemplateOpen)}
+                className="w-full p-4 border-2 border-primary rounded-lg flex items-center gap-4 transition-all hover:bg-primary/20"
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+              >
+                <img
+                  src={selectedTemplate}
+                  alt="Selected template"
+                  className="w-12 h-12 object-contain"
+                />
+                <span className="font-press-start text-sm">
+                  {templates.find(t => t.src === selectedTemplate)?.name}
+                </span>
+                <svg
+                  className={`w-4 h-4 ml-auto transition-transform ${isTemplateOpen ? 'rotate-180' : ''}`}
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
                 >
-                  <img
-                    src={template.src}
-                    alt={template.name}
-                    className="w-12 h-12 object-contain"
-                  />
-                  <span className="font-press-start text-sm">{template.name}</span>
-                </MotionButton>
-              ))}
+                  <path d="M19 9l-7 7-7-7" />
+                </svg>
+              </MotionButton>
+
+              <AnimatePresence>
+                {isTemplateOpen && (
+                  <MotionDiv
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    className="absolute top-full left-0 right-0 mt-2 bg-background border-2 border-primary rounded-lg shadow-lg z-50 max-h-[350px] overflow-y-auto"
+                  >
+                    {templates.map((template, index) => (
+                      <MotionButton
+                        key={index}
+                        onClick={() => {
+                          setSelectedTemplate(template.src);
+                          setIsTemplateOpen(false);
+                        }}
+                        className={`w-full p-4 flex items-center gap-4 transition-all ${
+                          selectedTemplate === template.src
+                            ? 'bg-primary text-background'
+                            : 'hover:bg-primary/20'
+                        }`}
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                      >
+                        <img
+                          src={template.src}
+                          alt={template.name}
+                          className="w-12 h-12 object-contain"
+                        />
+                        <span className="font-press-start text-sm">{template.name}</span>
+                      </MotionButton>
+                    ))}
+                  </MotionDiv>
+                )}
+              </AnimatePresence>
             </div>
           </div>
 
           {/* Background Selector */}
-          <div className="bg-primary/10 rounded-xl p-6">
+          <div className="bg-primary/10 rounded-xl p-6" ref={backgroundDropdownRef}>
             <h3 className="font-press-start mb-6">Choose Background</h3>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-4 max-h-[300px] overflow-y-auto pr-2">
+            <div className="relative">
               <MotionButton
-                onClick={() => setSelectedBackground(null)}
-                className={`w-full p-4 border-2 border-primary rounded-lg flex items-center gap-4 transition-all ${
-                  selectedBackground === null
-                    ? 'bg-primary text-background'
-                    : 'bg-transparent hover:bg-primary/20'
-                }`}
+                onClick={() => setIsBackgroundOpen(!isBackgroundOpen)}
+                className="w-full p-4 border-2 border-primary rounded-lg flex items-center gap-4 transition-all hover:bg-primary/20"
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
               >
-                <div className="w-12 h-12 bg-white/10 rounded flex items-center justify-center">
-                  ❌
-                </div>
-                <span className="font-press-start text-sm">No Background</span>
-              </MotionButton>
-              {backgrounds.map((bg, index) => (
-                <MotionButton
-                  key={index}
-                  onClick={() => setSelectedBackground(bg.src)}
-                  className={`w-full p-4 border-2 border-primary rounded-lg flex items-center gap-4 transition-all ${
-                    selectedBackground === bg.src
-                      ? 'bg-primary text-background'
-                      : 'bg-transparent hover:bg-primary/20'
-                  }`}
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                >
+                {selectedBackground ? (
                   <img
-                    src={bg.src}
-                    alt={bg.name}
+                    src={selectedBackground}
+                    alt="Selected background"
                     className="w-12 h-12 object-cover rounded"
                   />
-                  <span className="font-press-start text-sm">{bg.name}</span>
-                </MotionButton>
-              ))}
+                ) : (
+                  <div className="w-12 h-12 bg-white/10 rounded flex items-center justify-center">
+                    ❌
+                  </div>
+                )}
+                <span className="font-press-start text-sm">
+                  {selectedBackground 
+                    ? backgrounds.find(b => b.src === selectedBackground)?.name 
+                    : 'No Background'}
+                </span>
+                <svg
+                  className={`w-4 h-4 ml-auto transition-transform ${isBackgroundOpen ? 'rotate-180' : ''}`}
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                >
+                  <path d="M19 9l-7 7-7-7" />
+                </svg>
+              </MotionButton>
+
+              <AnimatePresence>
+                {isBackgroundOpen && (
+                  <MotionDiv
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    className="absolute top-full left-0 right-0 mt-2 bg-background border-2 border-primary rounded-lg shadow-lg z-50 max-h-[350px] overflow-y-auto"
+                  >
+                    <MotionButton
+                      onClick={() => {
+                        setSelectedBackground(null);
+                        setIsBackgroundOpen(false);
+                      }}
+                      className={`w-full p-4 flex items-center gap-4 transition-all ${
+                        selectedBackground === null
+                          ? 'bg-primary text-background'
+                          : 'hover:bg-primary/20'
+                      }`}
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                    >
+                      <div className="w-12 h-12 bg-white/10 rounded flex items-center justify-center">
+                        ❌
+                      </div>
+                      <span className="font-press-start text-sm">No Background</span>
+                    </MotionButton>
+                    {backgrounds.map((bg, index) => (
+                      <MotionButton
+                        key={index}
+                        onClick={() => {
+                          setSelectedBackground(bg.src);
+                          setIsBackgroundOpen(false);
+                        }}
+                        className={`w-full p-4 flex items-center gap-4 transition-all ${
+                          selectedBackground === bg.src
+                            ? 'bg-primary text-background'
+                            : 'hover:bg-primary/20'
+                        }`}
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                      >
+                        <img
+                          src={bg.src}
+                          alt={bg.name}
+                          className="w-12 h-12 object-cover rounded"
+                        />
+                        <span className="font-press-start text-sm">{bg.name}</span>
+                      </MotionButton>
+                    ))}
+                  </MotionDiv>
+                )}
+              </AnimatePresence>
             </div>
           </div>
         </div>
 
-        {/* Meme Canvas */}
-        <div>
+        {/* Middle Column - Meme Canvas */}
+        <div className="flex items-center justify-center">
           <div
             ref={canvasRef}
-            className="relative max-w-sm mx-auto mb-8 rounded-xl overflow-hidden"
+            className="relative w-full max-w-2xl rounded-xl overflow-hidden"
             style={{ 
               backgroundColor: selectedBackground ? 'transparent' : '#ffffff',
               aspectRatio: '1 / 1'
@@ -225,7 +333,7 @@ const MemeGenerator = () => {
             ) : (
               <div className="absolute inset-0 bg-white" />
             )}
-            <div className="absolute inset-0 bg-black/5" /> {/* Subtle overlay for better contrast */}
+            <div className="absolute inset-0 bg-black/5" />
             <div className="relative z-10 w-full h-full flex items-center justify-center">
               <img
                 src={selectedTemplate}
@@ -249,9 +357,15 @@ const MemeGenerator = () => {
               </p>
             </div>
           </div>
+        </div>
 
-          {/* Controls */}
-          <div className="max-w-sm mx-auto space-y-4">
+        {/* Right Column - Controls */}
+        <div className="space-y-8">
+          {/* Text Controls */}
+          <div className="bg-primary/10 rounded-xl p-6 space-y-4">
+            <h3 className="font-press-start mb-6">Customize Meme</h3>
+            
+            {/* Size Control */}
             <div className="space-y-2">
               <div className="flex items-center justify-between">
                 <label className="text-sm font-press-start">Image Size</label>
@@ -278,41 +392,47 @@ const MemeGenerator = () => {
               </div>
             </div>
 
-            <input
-              type="text"
-              placeholder="Top Text"
-              value={topText}
-              onChange={(e) => setTopText(e.target.value)}
-              className="w-full p-4 bg-primary/10 border-2 border-primary rounded-lg text-white focus:outline-none focus:border-accent"
-            />
-            <input
-              type="text"
-              placeholder="Bottom Text"
-              value={bottomText}
-              onChange={(e) => setBottomText(e.target.value)}
-              className="w-full p-4 bg-primary/10 border-2 border-primary rounded-lg text-white focus:outline-none focus:border-accent"
-            />
-            <div className="flex gap-4">
-              <MotionButton
-                onClick={downloadMeme}
-                className="flex-1 p-4 bg-primary text-background font-press-start rounded-lg hover:bg-accent transition-colors"
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-              >
-                Download
-              </MotionButton>
-              <MotionButton
-                onClick={shareOnX}
-                className="flex-1 p-4 bg-black text-white font-press-start rounded-lg hover:bg-accent transition-colors flex items-center justify-center gap-2"
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-              >
-                Share on
-                <svg className="w-5 h-5 fill-current" viewBox="0 0 24 24">
-                  <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
-                </svg>
-              </MotionButton>
+            {/* Text Inputs */}
+            <div className="space-y-4">
+              <input
+                type="text"
+                placeholder="Top Text"
+                value={topText}
+                onChange={(e) => setTopText(e.target.value)}
+                className="w-full p-4 bg-primary/10 border-2 border-primary rounded-lg text-white focus:outline-none focus:border-accent"
+              />
+              <input
+                type="text"
+                placeholder="Bottom Text"
+                value={bottomText}
+                onChange={(e) => setBottomText(e.target.value)}
+                className="w-full p-4 bg-primary/10 border-2 border-primary rounded-lg text-white focus:outline-none focus:border-accent"
+              />
             </div>
+          </div>
+
+          {/* Action Buttons */}
+          <div className="bg-primary/10 rounded-xl p-6 space-y-4">
+            <h3 className="font-press-start mb-6">Share Your Meme</h3>
+            <MotionButton
+              onClick={downloadMeme}
+              className="w-full p-4 bg-primary text-background font-press-start rounded-lg hover:bg-accent transition-colors"
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+            >
+              Download
+            </MotionButton>
+            <MotionButton
+              onClick={shareOnX}
+              className="w-full p-4 bg-black text-white font-press-start rounded-lg hover:bg-accent transition-colors flex items-center justify-center gap-2"
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+            >
+              Share on
+              <svg className="w-5 h-5 fill-current" viewBox="0 0 24 24">
+                <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+              </svg>
+            </MotionButton>
           </div>
         </div>
       </div>
