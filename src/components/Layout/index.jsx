@@ -38,7 +38,6 @@ const Layout = ({ children }) => {
       label: 'Community',
       items: [
         { path: '/community', label: 'Join Us' },
-        { path: '/gallery', label: 'Meme Gallery' },
       ]
     },
     {
@@ -46,6 +45,7 @@ const Layout = ({ children }) => {
       isSpecial: true,
       items: [
         { path: '/meme-generator', label: 'Meme Generator' },
+        { path: '/gallery', label: 'Meme Gallery' },
       ]
     },
   ];
