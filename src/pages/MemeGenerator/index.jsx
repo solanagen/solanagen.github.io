@@ -120,23 +120,47 @@ const MemeGenerator = () => {
     { src: '/angry_pepe.png', name: 'Angry' },
     { src: '/angry2_pepe.png', name: 'Angry 2' },
     { src: '/chill_pepe.png', name: 'Chill' },
+    { src: '/CLOWN.png', name: 'Clown' },
+    { src: '/computerrstik.png', name: 'Computer' },
+    { src: '/COOL.png', name: 'Cool' },
     { src: '/drooling_pepe.png', name: 'Drooling' },
     { src: '/excited_pepe.png', name: 'Excited' },
+    { src: '/feelsgood.png', name: 'Feels Good' },
     { src: '/gm_coffee_pepe.png', name: 'GM Coffee' },
     { src: '/green_candle_pepe.png', name: 'Green Candle' },
     { src: '/horny_pepe.png', name: 'Horny' },
+    { src: '/lookup.png', name: 'Look Up' },
     { src: '/love_pepe.png', name: 'Love' },
     { src: '/me_question_mark_pepe_or_shy.png', name: 'Shy' },
+    { src: '/on floorst.png', name: 'On Floor' },
     { src: '/peeking_pepe.png', name: 'Peeking' },
+    { src: '/pog.png', name: 'Pog' },
     { src: '/rofl_pepe.png', name: 'ROFL' },
     { src: '/sleep_pepe.png', name: 'Sleep' },
+    { src: '/smokingSTIK.png', name: 'Smoking' },
     { src: '/sniping_pepe.png', name: 'Sniping' },
     { src: '/surprised_pepe.png', name: 'Surprised' },
     { src: '/thoughtful_pepe.png', name: 'Thoughtful' },
     { src: '/typing_pepe.png', name: 'Typing' },
     { src: '/unimpressed_pepe.png', name: 'Unimpressed' },
     { src: '/victory_pepe.png', name: 'Victory' },
-  ].sort((a, b) => a.name.localeCompare(b.name));
+    // Animated templates (webm)
+    { src: '/confused_pepe.webm', name: 'Confused (Animated)', isAnimated: true },
+    { src: '/cutie.webm', name: 'Cutie (Animated)', isAnimated: true },
+    { src: '/me_question_mark_pepe_or_shy.webm', name: 'Shy (Animated)', isAnimated: true },
+    { src: '/peeking-pepe.webm', name: 'Peeking (Animated)', isAnimated: true },
+    { src: '/relaxed-with-coffee-and-snowing-outside.webm', name: 'Relaxed Coffee (Animated)', isAnimated: true },
+    { src: '/rofl_pepe.webm', name: 'ROFL (Animated)', isAnimated: true },
+    { src: '/typing_pepe.webm', name: 'Typing (Animated)', isAnimated: true },
+    { src: '/victory_pepe.webm', name: 'Victory (Animated)', isAnimated: true },
+  ].sort((a, b) => {
+    // First sort by animation status (non-animated first)
+    if (a.isAnimated !== b.isAnimated) {
+      return a.isAnimated ? 1 : -1;
+    }
+    // Then sort by name
+    return a.name.localeCompare(b.name);
+  });
 
   const backgrounds = [
     { src: '/backgrounds/1.png', name: 'Background 1' },
