@@ -28,8 +28,6 @@ const Layout = ({ children }) => {
       label: 'Tools',
       items: [
         { path: '/meme-generator', label: 'Meme Generator' },
-        { path: '/chat', label: 'Chat with AI' },
-        // { path: '/terminal', label: 'Trading Terminal' },
       ]
     },
   ];
