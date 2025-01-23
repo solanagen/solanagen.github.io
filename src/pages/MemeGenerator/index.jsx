@@ -13,11 +13,92 @@ const MemeGenerator = () => {
   const [topText, setTopText] = useState('');
   const [bottomText, setBottomText] = useState('');
   const [imageScale, setImageScale] = useState(1);
+  const [position, setPosition] = useState({ x: 0, y: 0 });
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
   const [isTemplateOpen, setIsTemplateOpen] = useState(false);
   const [isBackgroundOpen, setIsBackgroundOpen] = useState(false);
   const canvasRef = useRef(null);
+  const imageRef = useRef(null);
   const templateDropdownRef = useRef(null);
   const backgroundDropdownRef = useRef(null);
+
+  // Reset position when template changes
+  useEffect(() => {
+    setPosition({ x: 0, y: 0 });
+  }, [selectedTemplate]);
+
+  // Handle drag start
+  const handleDragStart = (e) => {
+    const clientX = e.type === 'mousedown' ? e.clientX : e.touches[0].clientX;
+    const clientY = e.type === 'mousedown' ? e.clientY : e.touches[0].clientY;
+
+    setIsDragging(true);
+    setDragStart({
+      x: clientX - position.x,
+      y: clientY - position.y
+    });
+  };
+
+  // Handle drag move
+  const handleDragMove = (e) => {
+    if (!isDragging) return;
+
+    const clientX = e.type === 'mousemove' ? e.clientX : e.touches[0].clientX;
+    const clientY = e.type === 'mousemove' ? e.clientY : e.touches[0].clientY;
+
+    const canvas = canvasRef.current;
+    const image = imageRef.current;
+    if (!canvas || !image) return;
+
+    const canvasRect = canvas.getBoundingClientRect();
+    const imageRect = image.getBoundingClientRect();
+
+    // Calculate boundaries
+    const maxX = (canvasRect.width - imageRect.width * imageScale) / 2;
+    const maxY = (canvasRect.height - imageRect.height * imageScale) / 2;
+    const minX = -maxX;
+    const minY = -maxY;
+
+    // Calculate new position
+    let newX = clientX - dragStart.x;
+    let newY = clientY - dragStart.y;
+
+    // Apply boundaries
+    newX = Math.min(Math.max(newX, minX), maxX);
+    newY = Math.min(Math.max(newY, minY), maxY);
+
+    setPosition({ x: newX, y: newY });
+  };
+
+  // Handle drag end
+  const handleDragEnd = () => {
+    setIsDragging(false);
+  };
+
+  // Add event listeners for drag
+  useEffect(() => {
+    const handleMouseMove = (e) => handleDragMove(e);
+    const handleTouchMove = (e) => {
+      e.preventDefault();
+      handleDragMove(e);
+    };
+    const handleUp = () => handleDragEnd();
+
+    if (isDragging) {
+      window.addEventListener('mousemove', handleMouseMove);
+      window.addEventListener('touchmove', handleTouchMove, { passive: false });
+      window.addEventListener('mouseup', handleUp);
+      window.addEventListener('touchend', handleUp);
+    }
+
+    return () => {
+      window.removeEventListener('mousemove', handleMouseMove);
+      window.removeEventListener('touchmove', handleTouchMove);
+      window.removeEventListener('mouseup', handleUp);
+      window.removeEventListener('touchend', handleUp);
+    };
+  }, [isDragging, dragStart, imageScale]);
 
   // Close dropdowns when clicking outside
   useEffect(() => {
@@ -318,12 +399,13 @@ const MemeGenerator = () => {
         <div className="flex items-center justify-center">
           <div
             ref={canvasRef}
-            className="relative w-full max-w-2xl rounded-xl overflow-hidden"
+            className="relative w-full max-w-2xl rounded-xl overflow-hidden select-none"
             style={{ 
               backgroundColor: selectedBackground ? 'transparent' : '#ffffff',
               aspectRatio: '1 / 1'
             }}
           >
+            {/* Background Layer */}
             {selectedBackground ? (
               <img
                 src={selectedBackground}
@@ -334,27 +416,43 @@ const MemeGenerator = () => {
               <div className="absolute inset-0 bg-white" />
             )}
             <div className="absolute inset-0 bg-black/5" />
-            <div className="relative z-10 w-full h-full flex items-center justify-center">
+
+            {/* Draggable Image Layer */}
+            <div 
+              className="relative z-10 w-full h-full cursor-move"
+              onMouseDown={handleDragStart}
+              onTouchStart={handleDragStart}
+              style={{
+                touchAction: 'none' // Prevent touch scrolling while dragging
+              }}
+            >
               <img
+                ref={imageRef}
                 src={selectedTemplate}
                 alt="Meme template"
-                className="w-full h-full object-contain transition-transform duration-200"
+                className="absolute w-full h-full object-contain transition-all duration-200"
                 style={{ 
                   filter: selectedBackground ? 'contrast(1.2) brightness(0.9)' : 'none',
                   mixBlendMode: selectedBackground ? 'multiply' : 'normal',
-                  transform: `scale(${imageScale})`
+                  transform: `translate(${position.x}px, ${position.y}px) scale(${imageScale})`,
+                  transformOrigin: 'center'
                 }}
+                draggable="false"
               />
             </div>
-            <div className="absolute top-4 left-0 right-0 px-4 text-center z-20">
-              <p className="text-white text-4xl font-['Impact'] uppercase break-words meme-text">
-                {topText}
-              </p>
-            </div>
-            <div className="absolute bottom-4 left-0 right-0 px-4 text-center z-20">
-              <p className="text-white text-4xl font-['Impact'] uppercase break-words meme-text">
-                {bottomText}
-              </p>
+
+            {/* Text Overlay Layer */}
+            <div className="absolute inset-0 z-20 pointer-events-none">
+              <div className="absolute top-4 left-0 right-0 px-4 text-center">
+                <p className="text-white text-4xl font-['Impact'] uppercase break-words meme-text">
+                  {topText}
+                </p>
+              </div>
+              <div className="absolute bottom-4 left-0 right-0 px-4 text-center">
+                <p className="text-white text-4xl font-['Impact'] uppercase break-words meme-text">
+                  {bottomText}
+                </p>
+              </div>
             </div>
           </div>
         </div>
@@ -369,12 +467,20 @@ const MemeGenerator = () => {
             <div className="space-y-2">
               <div className="flex items-center justify-between">
                 <label className="text-sm font-press-start">Image Size</label>
-                <button
-                  onClick={handleScaleReset}
-                  className="text-xs font-press-start text-primary hover:text-accent transition-colors"
-                >
-                  Reset Size
-                </button>
+                <div className="flex gap-4">
+                  <button
+                    onClick={() => setPosition({ x: 0, y: 0 })}
+                    className="text-xs font-press-start text-primary hover:text-accent transition-colors"
+                  >
+                    Reset Position
+                  </button>
+                  <button
+                    onClick={handleScaleReset}
+                    className="text-xs font-press-start text-primary hover:text-accent transition-colors"
+                  >
+                    Reset Size
+                  </button>
+                </div>
               </div>
               <div className="flex items-center gap-4">
                 <input
