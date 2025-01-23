@@ -27,19 +27,9 @@ const Layout = ({ children }) => {
   const menuItems = [
     { path: '/', label: 'Home' },
     { path: '/about', label: 'About' },
-    {
-      label: 'Features',
-      items: [
-        { path: '/tokenomics', label: 'Tokenomics' },
-        { path: '/roadmap', label: 'Roadmap' },
-      ]
-    },
-    {
-      label: 'Community',
-      items: [
-        { path: '/community', label: 'Join Us' },
-      ]
-    },
+    { path: '/tokenomics', label: 'Tokenomics' },
+    { path: '/roadmap', label: 'Roadmap' },
+    { path: '/community', label: 'Join Us' },
     {
       label: 'Tools',
       isSpecial: true,
