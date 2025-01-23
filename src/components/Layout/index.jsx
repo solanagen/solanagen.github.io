@@ -7,6 +7,23 @@ const Layout = ({ children }) => {
   const [activeDropdown, setActiveDropdown] = useState(null);
   const location = useLocation();
 
+  // Animation variants for the Tools menu
+  const toolsAnimation = {
+    animate: {
+      scale: [1, 1.05, 1],
+      boxShadow: [
+        "0 0 0 0 rgba(0, 255, 0, 0)",
+        "0 0 20px 2px rgba(0, 255, 0, 0.3)",
+        "0 0 0 0 rgba(0, 255, 0, 0)"
+      ],
+      transition: {
+        duration: 2,
+        repeat: Infinity,
+        ease: "easeInOut"
+      }
+    }
+  };
+
   const menuItems = [
     { path: '/', label: 'Home' },
     { path: '/about', label: 'About' },
@@ -26,6 +43,7 @@ const Layout = ({ children }) => {
     },
     {
       label: 'Tools',
+      isSpecial: true,
       items: [
         { path: '/meme-generator', label: 'Meme Generator' },
       ]
@@ -71,15 +89,23 @@ const Layout = ({ children }) => {
                     onMouseEnter={() => setActiveDropdown(item.label)}
                     onMouseLeave={() => setActiveDropdown(null)}
                   >
-                    <button
+                    <motion.button
                       onClick={() => handleDropdownClick(item.label)}
-                      className="font-press-start text-sm text-white hover:text-accent transition-colors flex items-center gap-1"
+                      className={`font-press-start text-sm hover:text-accent transition-colors flex items-center gap-1 ${
+                        item.isSpecial 
+                          ? 'text-accent font-bold bg-primary/10 px-4 py-2 rounded-lg border-2 border-accent' 
+                          : 'text-white'
+                      }`}
+                      {...(item.isSpecial && { 
+                        variants: toolsAnimation,
+                        animate: "animate"
+                      })}
                     >
                       {item.label}
                       <svg className="w-4 h-4" viewBox="0 0 20 20" fill="currentColor">
                         <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
                       </svg>
-                    </button>
+                    </motion.button>
                     <AnimatePresence>
                       {activeDropdown === item.label && (
                         <motion.div
@@ -87,7 +113,9 @@ const Layout = ({ children }) => {
                           animate={{ opacity: 1, y: 0 }}
                           exit={{ opacity: 0, y: -10 }}
                           transition={{ duration: 0.2 }}
-                          className="absolute top-full left-0 mt-2 w-48 bg-black/90 backdrop-blur-sm rounded-lg border border-primary/20 overflow-hidden"
+                          className={`absolute top-full left-0 mt-2 w-48 bg-black/90 backdrop-blur-sm rounded-lg border overflow-hidden ${
+                            item.isSpecial ? 'border-accent' : 'border-primary/20'
+                          }`}
                         >
                           {item.items.map((subItem) => (
                             <Link
