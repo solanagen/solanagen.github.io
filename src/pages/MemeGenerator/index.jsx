@@ -1,6 +1,7 @@
 import { useState, useRef } from 'react';
 import { motion } from 'framer-motion';
 import html2canvas from 'html2canvas';
+import Draggable from 'react-draggable';
 
 const MotionDiv = motion.div;
 const MotionH1 = motion.h1;
@@ -12,6 +13,8 @@ const MemeGenerator = () => {
   const [selectedBackground, setSelectedBackground] = useState(null);
   const [topText, setTopText] = useState('');
   const [bottomText, setBottomText] = useState('');
+  const [imageScale, setImageScale] = useState(1);
+  const [position, setPosition] = useState({ x: 0, y: 0 });
   const canvasRef = useRef(null);
 
   const templates = [
@@ -45,18 +48,38 @@ const MemeGenerator = () => {
     { src: '/backgrounds/5.png', name: 'Background 5' },
   ];
 
+  const handleDrag = (e, data) => {
+    setPosition({ x: data.x, y: data.y });
+  };
+
+  const handleScaleChange = (e) => {
+    setImageScale(parseFloat(e.target.value));
+  };
+
+  const resetTransform = () => {
+    setPosition({ x: 0, y: 0 });
+    setImageScale(1);
+  };
+
   const downloadMeme = async () => {
     const element = canvasRef.current;
     const canvas = await html2canvas(element, {
       allowTaint: true,
       useCORS: true,
       backgroundColor: selectedBackground ? null : '#ffffff',
-      scale: 2, // Higher quality output
+      scale: 2,
       logging: false,
       onclone: (clonedDoc) => {
-        const clonedElement = clonedDoc.querySelector('[data-html2canvas-ignore]');
-        if (clonedElement) {
-          clonedElement.remove();
+        // Ensure transforms are captured correctly
+        const dragElement = clonedDoc.querySelector('.draggable-meme');
+        if (dragElement) {
+          const translateX = position.x;
+          const translateY = position.y;
+          dragElement.style.transform = `translate(calc(-50% + ${translateX}px), calc(-50% + ${translateY}px))`;
+          const imageContainer = dragElement.querySelector('div');
+          if (imageContainer) {
+            imageContainer.style.transform = `scale(${imageScale})`;
+          }
         }
       }
     });
@@ -220,18 +243,39 @@ const MemeGenerator = () => {
             ) : (
               <div className="absolute inset-0 bg-white" />
             )}
-            <div className="absolute inset-0 bg-black/5" /> {/* Subtle overlay for better contrast */}
-            <div className="relative z-10 w-full h-full flex items-center justify-center">
-              <img
-                src={selectedTemplate}
-                alt="Meme template"
-                className="w-full h-full object-contain"
-                style={{ 
-                  filter: selectedBackground ? 'contrast(1.2) brightness(0.9)' : 'none',
-                  mixBlendMode: selectedBackground ? 'multiply' : 'normal'
-                }}
-              />
-            </div>
+            <div className="absolute inset-0 bg-black/5" />
+            <Draggable
+              position={position}
+              onDrag={handleDrag}
+              bounds="parent"
+            >
+              <div className="draggable-meme absolute w-full h-full cursor-move"
+                   style={{ 
+                     top: '50%',
+                     left: '50%',
+                     transform: 'translate(-50%, -50%)'
+                   }}
+              >
+                <div 
+                  className="w-full h-full flex items-center justify-center"
+                  style={{ 
+                    transform: `scale(${imageScale})`,
+                    transformOrigin: 'center center'
+                  }}
+                >
+                  <img
+                    src={selectedTemplate}
+                    alt="Meme template"
+                    className="w-full h-full object-contain"
+                    style={{ 
+                      filter: selectedBackground ? 'contrast(1.2) brightness(0.9)' : 'none',
+                      mixBlendMode: selectedBackground ? 'multiply' : 'normal'
+                    }}
+                    draggable="false"
+                  />
+                </div>
+              </div>
+            </Draggable>
             <div className="absolute top-4 left-0 right-0 px-4 text-center z-20">
               <p className="text-white text-4xl font-['Impact'] uppercase break-words meme-text">
                 {topText}
@@ -246,6 +290,26 @@ const MemeGenerator = () => {
 
           {/* Controls */}
           <div className="max-w-sm mx-auto space-y-4">
+            <div className="bg-primary/10 p-4 rounded-lg space-y-4">
+              <div className="flex items-center justify-between">
+                <label className="font-press-start text-sm">Pepe Size</label>
+                <button
+                  onClick={resetTransform}
+                  className="text-sm text-primary hover:text-accent transition-colors"
+                >
+                  Reset
+                </button>
+              </div>
+              <input
+                type="range"
+                min="0.5"
+                max="2"
+                step="0.1"
+                value={imageScale}
+                onChange={handleScaleChange}
+                className="w-full accent-primary"
+              />
+            </div>
             <input
               type="text"
               placeholder="Top Text"
