@@ -150,12 +150,12 @@ const MemeGenerator = () => {
               className="w-full rounded-xl"
             />
             <div className="absolute top-4 left-0 right-0 px-4 text-center">
-              <p className="text-white text-4xl font-['Impact'] uppercase break-words text-stroke-black">
+              <p className="text-white text-4xl font-['Impact'] uppercase break-words meme-text">
                 {topText}
               </p>
             </div>
             <div className="absolute bottom-4 left-0 right-0 px-4 text-center">
-              <p className="text-white text-4xl font-['Impact'] uppercase break-words text-stroke-black">
+              <p className="text-white text-4xl font-['Impact'] uppercase break-words meme-text">
                 {bottomText}
               </p>
             </div>
