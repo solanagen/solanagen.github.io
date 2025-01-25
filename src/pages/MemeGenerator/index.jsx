@@ -23,6 +23,14 @@ const MemeGenerator = () => {
   const templateDropdownRef = useRef(null);
   const backgroundDropdownRef = useRef(null);
 
+  const [backgrounds, setBackgrounds] = useState([
+    { src: '/backgrounds/1.png', name: 'Background 1' },
+    { src: '/backgrounds/2.png', name: 'Background 2' },
+    { src: '/backgrounds/3.png', name: 'Background 3' },
+    { src: '/backgrounds/4.png', name: 'Background 4' },
+    { src: '/backgrounds/5.png', name: 'Background 5' },
+  ]);
+
   // Reset position when template changes
   useEffect(() => {
     setPosition({ x: 0, y: 0 });
@@ -146,13 +154,42 @@ const MemeGenerator = () => {
     { src: '/victory_pepe.png', name: 'Victory' }
   ].sort((a, b) => a.name.localeCompare(b.name));
 
-  const backgrounds = [
-    { src: '/backgrounds/1.png', name: 'Background 1' },
-    { src: '/backgrounds/2.png', name: 'Background 2' },
-    { src: '/backgrounds/3.png', name: 'Background 3' },
-    { src: '/backgrounds/4.png', name: 'Background 4' },
-    { src: '/backgrounds/5.png', name: 'Background 5' },
-  ];
+  // Handle file upload for custom background
+  const handleBackgroundUpload = (event) => {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      alert('Please upload an image file');
+      return;
+    }
+
+    // Create object URL for the uploaded file
+    const objectUrl = URL.createObjectURL(file);
+    
+    // Add the uploaded background to the list
+    setBackgrounds(prev => [{
+      src: objectUrl,
+      name: file.name,
+      isCustom: true
+    }, ...prev]);
+
+    // Select the uploaded background
+    setSelectedBackground(objectUrl);
+    setIsBackgroundOpen(false);
+  };
+
+  // Cleanup object URLs when component unmounts
+  useEffect(() => {
+    return () => {
+      backgrounds.forEach(bg => {
+        if (bg.isCustom) {
+          URL.revokeObjectURL(bg.src);
+        }
+      });
+    };
+  }, [backgrounds]);
 
   const downloadMeme = async () => {
     const element = canvasRef.current;
@@ -192,7 +229,7 @@ const MemeGenerator = () => {
     const file = new File([blob], 'meme.png', { type: 'image/png' });
 
     // Create tweet text
-    const tweetText = "Created with @AutismIntel Meme Generator 🧠\n\n$AI #AutismIntelligence";
+    const tweetText = "Created with @autismintel_ai Meme Generator 🧠\n\n$AI #AutismIntelligence";
 
     // Try to use Web Share API first
     if (navigator.share && navigator.canShare({ files: [file] })) {
@@ -355,6 +392,24 @@ const MemeGenerator = () => {
                     exit={{ opacity: 0, y: -10 }}
                     className="absolute top-full left-0 right-0 mt-2 bg-background border-2 border-primary rounded-lg shadow-lg z-50 max-h-[350px] overflow-y-auto"
                   >
+                    {/* Upload button */}
+                    <label className="block w-full p-4 cursor-pointer hover:bg-primary/20 transition-colors border-b-2 border-primary/20">
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={handleBackgroundUpload}
+                        className="hidden"
+                      />
+                      <div className="flex items-center gap-4">
+                        <div className="w-12 h-12 bg-primary/10 rounded flex items-center justify-center">
+                          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                          </svg>
+                        </div>
+                        <span className="font-press-start text-sm">Upload Background</span>
+                      </div>
+                    </label>
+
                     <MotionButton
                       onClick={() => {
                         setSelectedBackground(null);
@@ -493,9 +548,9 @@ const MemeGenerator = () => {
               <div className="flex items-center gap-4">
                 <input
                   type="range"
-                  min="0.5"
-                  max="2"
-                  step="0.1"
+                  min="0.1"
+                  max="1"
+                  step="0.05"
                   value={imageScale}
                   onChange={(e) => setImageScale(parseFloat(e.target.value))}
                   className="w-full h-2 bg-primary/20 rounded-lg appearance-none cursor-pointer accent-primary hover:accent-accent"
