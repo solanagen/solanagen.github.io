@@ -17,13 +17,13 @@ const Community = () => {
     },
     {
       platform: "Dexscreener",
-      link: "https://dexscreener.com/autismintelligence",
+      link: "https://dexscreener.com/solana/__placeholder__",
       description: "Find us on Dexscreener!",
       sticker: "/love_pepe.png"
     },
     {
       platform: "Twitter",
-      link: "https://twitter.com/autismintelligence",
+      link: "https://twitter.com/autism_intel_ai",
       description: "Follow us for the dankest memes!",
       sticker: "/drooling_pepe.png"
     }
