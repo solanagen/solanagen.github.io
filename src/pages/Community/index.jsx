@@ -17,7 +17,7 @@ const Community = () => {
     },
     {
       platform: "Dexscreener",
-      link: "https://dexscreener.com/solana/__placeholder__",
+      link: "https://dexscreener.com/solana/8hdwur98mjp2yzakqpfkenmkljct2u1ejjxlpfrcgzt4",
       description: "Find us on Dexscreener!",
       sticker: "/love_pepe.png"
     },

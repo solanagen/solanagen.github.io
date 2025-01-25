@@ -7,7 +7,7 @@ const MotionDiv = motion.div;
 const MotionH1 = motion.h1;
 const MotionP = motion.p;
 
-const CONTRACT_ADDRESS = "0x420694206942069420694206942069420";
+const CONTRACT_ADDRESS = "4bNDaJovARDDFa6zfCKLu8uXLNhyU29syZEjNQQ6pump";
 
 const hackingText = [
   "INITIALIZING HACK...",
