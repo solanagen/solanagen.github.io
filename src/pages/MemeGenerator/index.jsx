@@ -229,7 +229,7 @@ const MemeGenerator = () => {
     const file = new File([blob], 'meme.png', { type: 'image/png' });
 
     // Create tweet text
-    const tweetText = "Created with @autismintel_ai Meme Generator 🧠\n\n$AI #AutismIntelligence";
+    const tweetText = "Created with @autism_intel_ai Meme Generator 🧠\n\n$AI #AutismIntelligence";
 
     // Try to use Web Share API first
     if (navigator.share && navigator.canShare({ files: [file] })) {
